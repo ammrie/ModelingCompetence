@@ -1,6 +1,5 @@
 ---
 title: "Evaluation Guide"
-toc: yes
 toc_label: In this info
 output:
   html_document:
