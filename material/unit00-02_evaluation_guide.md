@@ -2,7 +2,9 @@
 title: "Evaluation Guide"
 toc: yes
 toc_label: In this info
-output: word_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 Criteria for the preparation and assessment of **project work** in modules of the regular BS/L3 course of study at the Department of Geography, Philipps-Universität Marburg
@@ -118,8 +120,7 @@ _Discussion:_ The limitations of the results are tested and discussed by varying
 
 For all levels, the best possible evaluation requires a formally, linguistically and logically largely error-free processing. The following table 2 serves to support these criteria. The so-called KO criteria automatically lead to a fail (n.b.).
 
-| **Requirements** |
- |
+| **Requirements** | |
 | --- | --- |
 | The formal conventions of the delivery were not observed (deadline, formats naming etc.) | n.b. |
 | Missing list of sources/literature, missing references in the text to literature or illustrations, plagiarism in the text/illustrations. | n.b. |
