@@ -26,8 +26,8 @@ theme_set(theme_pubr())
 data=read.csv2("src/assessment_matrix.csv",sep = "",header = TRUE,row.names = 1)
 
 # list of groups  and number of members for the bubbleplots
-plt_lst=c("all_15","female_4","male_8","mix_3","bachelor_7","teacher_8")
-
+#plt_lst=c("all_15","female_4","male_8","mix_3","bachelor_7","teacher_8")
+plt_lst=c("all_15","bachelor_7","teacher_8")
 set.seed(123)
 
 ###--------- Estimation of the optimal methods and cluster numbers
@@ -202,7 +202,7 @@ png("figures/figure7.png",res=300, width = 1920,height = 1920) # Open a new pdf 
 grid_arrange_shared_legend(p1, p2, p4, p3,nrow = 2) # Write the grid.arrange in the file
 dev.off() # C
 
-# gsave(file="whatver.PDF", arrangeGrob(p1, p2, p4, p3,nrow = 2))
+# ggsave(file="whatver.PDF", arrangeGrob(p1, p2, p4, p3,nrow = 2))
 
 
 
@@ -273,9 +273,9 @@ t_data=do.call("rbind", res)
 
 # count per group done each by each for more transparence
 all     = t_data %>% group_by(levels, dimensions)%>%  summarize(count=n())
-female  = t_data %>% group_by(levels, dimensions)%>% filter(sex == "f")%>%  summarize(count=n())
-male    = t_data %>% group_by(levels, dimensions)%>% filter(sex == "m")%>%  summarize(count=n())
-mix     = t_data %>% group_by(levels, dimensions)%>% filter(sex == "mix")%>%  summarize(count=n())
+#female  = t_data %>% group_by(levels, dimensions)%>% filter(sex == "f")%>%  summarize(count=n())
+#male    = t_data %>% group_by(levels, dimensions)%>% filter(sex == "m")%>%  summarize(count=n())
+#mix     = t_data %>% group_by(levels, dimensions)%>% filter(sex == "mix")%>%  summarize(count=n())
 bachelor= t_data %>% group_by(levels, dimensions)%>% filter(degree.program == "B")%>%  summarize(count=n())
 teacher = t_data %>% group_by(levels, dimensions)%>% filter(degree.program == "T")%>%  summarize(count=n())
 
@@ -287,9 +287,16 @@ for (plt in plt_lst){
   assign(paste0("g_",plt),bubbleplot(data = eval(parse(text =name)),paste(name,"n=",no)))
 }
 
+grid.arrange(g_all_15  ,g_bachelor_7 ,g_teacher_8,nrow = 3)
+
+png("figures/figure3.png",res=300, width = 1920,height = 1920)
+grid.arrange(g_all_15  ,g_bachelor_7 ,g_teacher_8,nrow = 3)
+dev.off() # C
+
+
 # create list and cowplot objects
 cowplot::plot_grid(plotlist = lapply(paste0("g_",plt_lst), function(x) {eval(parse(text =as.name(x)))}),
-                   ncol = 2,nrow = 3)
+                   ncol = 1,nrow = 3)
 
 # ordination plots
 res.ca <- FactoMineR::CA(data[1:4], graph = FALSE)
