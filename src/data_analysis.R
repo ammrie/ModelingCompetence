@@ -15,13 +15,17 @@ library(gridExtra)
 library(FactoMineR)
 library(factoextra)
 library(ggpubr)
-library(ggplot2)      
+library(ggplot2)
+library(gridExtra)
+library(grid)
+
+
 theme_set(theme_pubr())
 
 #-- read DATA
-data=read.csv2("assessment_matrix.csv",sep = "",header = TRUE,row.names = 1)
+data=read.csv2("src/assessment_matrix.csv",sep = "",header = TRUE,row.names = 1)
 
-# list of groups  and number of members for the bubbleplots  
+# list of groups  and number of members for the bubbleplots
 plt_lst=c("all_15","female_4","male_8","mix_3","bachelor_7","teacher_8")
 
 set.seed(123)
@@ -32,14 +36,14 @@ set.seed(123)
 h <- clustertend::hopkins(data = data[1:4], n = nrow(data)-1)
 h
 #-- Flexible Procedures for Clustering
-# perform a partitioning around medoids clustering with the number 
+# perform a partitioning around medoids clustering with the number
 # of clusters estimated by optimum average silhouette width
 pamk.best <- fpc::pamk(data[1:4],criterion="asw",
-                       krange = 3:7,usepam = TRUE, 
+                       krange = 3:7,usepam = TRUE,
                        ns=2, critout=TRUE)
 
 
-##-- kmeans.best cluster results used for 
+##-- kmeans.best cluster results used for
 ##
 kmeans.best= fpc::kmeansruns(data[1:4],krange=4,critout=TRUE,
                              runs=10,criterion=c("asw"))
@@ -52,22 +56,22 @@ plot(cluster::pam(data[1:4], pamk.best$nc))
 
 
 #-- NbClust Package for determining the best number of clusters
-# NbClust package provides 30 indices for determining the number of clusters 
-# and proposes to user the best clustering 
+# NbClust package provides 30 indices for determining the number of clusters
+# and proposes to user the best clustering
 # identify optimal cluster number
 
-nb_wardD2 = NbClust::NbClust(data[1:4], distance="euclidean", 
-                             min.nc=3, max.nc=7, 
+nb_wardD2 = NbClust::NbClust(data[1:4], distance="euclidean",
+                             min.nc=3, max.nc=7,
                              method="ward.D2", index="dindex",
                              alphaBeale = 0.05)
-nb_kmeans = NbClust::NbClust(data[1:4], distance = "euclidean", 
-                             min.nc=3, max.nc=7, 
-                             method = "kmeans", 
+nb_kmeans = NbClust::NbClust(data[1:4], distance = "euclidean",
+                             min.nc=3, max.nc=7,
+                             method = "kmeans",
                              index = "dindex",
                              alphaBeale = 0.05)
 
 nb_best <- NbClust::NbClust(data[1:4], distance = "euclidean",
-                            min.nc = 3, max.nc = 7, 
+                            min.nc = 3, max.nc = 7,
                             method = "kmeans", index ="all",
                             alphaBeale = 0.05)
 data$nb_Best.partition=nb_best$Best.partition
@@ -79,13 +83,13 @@ factoextra::fviz_nbclust(nb_best) + theme_minimal() +
 # calculate and visualize elbow method
 factoextra::fviz_nbclust(data[1:4], method="wss", FUNcluster=kmeans, iter.max = 30,print.summary = TRUE)+
   theme_classic()+ geom_vline(xintercept = 4 , linetype = 2)+
-  labs(title= "K-means") + 
+  labs(title= "K-means") +
   xlab("Number of Clusters K") +
   ylab("Explained variance %")+
   ggtitle("NbClust's optimal number of clusters")
 
-# optCluster performs statistical and/or biological validation 
-# of clustering results and determines the optimal clustering 
+# optCluster performs statistical and/or biological validation
+# of clustering results and determines the optimal clustering
 # algorithm and number of clusters through rank aggreation.
 ## Analysis of Count Data using Internal and Stability Validation Measures
 res_opt_clust <- optCluster::optCluster(data[1:4], 3:7, clMethods = c("kmeans"),distance = "Kendall",
@@ -121,10 +125,11 @@ pam <- factoextra::eclust(data[1:4],seed=123, FUNcluster ="pam", k = 4,
 pam.clus <- factoextra::fviz_cluster(pam,main = "PAM eclust")
 pam.sil <- factoextra::fviz_silhouette(pam)
 
+
 # create panel
 list.plot <- list() #list to store the plots
 list.plot[[1]] <- km.clus
-list.plot[[2]] <- km.sil    
+list.plot[[2]] <- km.sil
 list.plot[[3]] <- pam.clus
 list.plot[[4]] <- pam.sil
 # plot it
@@ -132,6 +137,77 @@ cowplot::plot_grid(plotlist = list.plot, ncol = 2)
 
 
 
+###################### Visualize cluster figure 7
+
+# helperfunction to get rid of the single legends
+# https://rpubs.com/sjackman/grid_arrange_shared_legend
+grid_arrange_shared_legend <- function(...) {
+  plots <- list(...)
+  g <- ggplotGrob(plots[[1]] + theme(legend.position="bottom"))$grobs
+  legend <- g[[which(sapply(g, function(x) x$name) == "guide-box")]]
+  lheight <- sum(legend$height)
+  grid.arrange(
+    do.call(arrangeGrob, lapply(plots, function(x)
+      x + theme(legend.position="none"))),
+    legend,
+    ncol = 1,
+    heights = unit.c(unit(1, "npc") - lheight, lheight))
+}
+
+
+# ggpairs color palatte for ggplot
+ggpairsPalette <- c( "#fef392", "#9adbbc", "#98b3c6", "#a180a9")
+# rescaling of the cluster according to the learning types
+data$kmbtypes[data$kmeans.best == 4] = 2
+data$kmbtypes[data$kmeans.best == 3] = 4
+data$kmbtypes[data$kmeans.best == 2] = 3
+data$kmbtypes[data$kmeans.best == 1] = 1
+
+# learning types
+lt = c("conceptional", "rebuilding", "engineering","reproductive")
+
+p1 = ggplot(data) +
+  geom_bar(aes(x = bachelor.teacher , fill =forcats::fct_rev(factor(kmbtypes)))) +
+  scale_x_discrete(labels=c("bachelor","teacher")) +
+  ylab("no of groups")+
+  xlab("")+
+  labs(subtitle = "study program")+
+  scale_fill_manual(name = "Types of  Learning", labels = lt,values=ggpairsPalette)
+
+p2 = ggplot(data) +
+  geom_bar(aes(x = factor(semester) , fill =forcats::fct_rev(factor(kmbtypes)))) +
+  scale_fill_manual(name = "Types of  Learning", labels = lt,values=ggpairsPalette)+
+  ylab("")+
+  xlab("semester number")+
+  labs( subtitle = "bachelor&teacher program")
+
+p3 =  ggplot(data[data$bachelor.teacher == "T",]) +
+  scale_fill_manual(name = "Types of  Learning", labels = lt,values=ggpairsPalette)+
+  geom_bar(aes(x = factor(semester) , fill =forcats::fct_rev(factor(kmbtypes)))) +
+  ylab("")+
+  xlab("semester number")+
+  labs( subtitle = "teacher program")
+
+p4 =  ggplot(data[data$bachelor.teacher == "B",]) +
+  scale_fill_manual(name = "Types of  Learning", labels = lt,values=ggpairsPalette)+
+  geom_bar(aes(x = factor(semester) , fill =forcats::fct_rev(factor(kmbtypes)))) +
+  ylab("no of groups")+
+  xlab("semester number")+
+  labs( subtitle = "bachelor program")
+
+# make a 2*2 panel
+grid_arrange_shared_legend(p1, p2, p4, p3,nrow = 2)
+
+png("figures/figure7.png",res=300, width = 1920,height = 1920) # Open a new pdf file
+grid_arrange_shared_legend(p1, p2, p4, p3,nrow = 2) # Write the grid.arrange in the file
+dev.off() # C
+
+# gsave(file="whatver.PDF", arrangeGrob(p1, p2, p4, p3,nrow = 2))
+
+
+
+
+###################################################################################
 
 # using pairs for kmeans.best fpc package
 pairs(data[1:4],cex=2, bg=c(1:4)[data$nb_Best.partition],pch = 21
@@ -139,12 +215,13 @@ pairs(data[1:4],cex=2, bg=c(1:4)[data$nb_Best.partition],pch = 21
       cex.labels = 1, font.labels = 1)
 # GGally ggpairsusing ggplot for kmeans.best fpc package
 # first sex subject
-GGally::ggpairs(data[c(7,6,8)] , 
+data=data[order(data$kmeans.best,decreasing = TRUE),]
+GGally::ggpairs(data[c(7,6,8)] ,
                 aes(color = factor(kmeans.best,levels = 1:4, labels = c("type 3", "type 1","type 2","type 4"))),
                 lower=list(continuous='points'),
                 axisLabels='show',
                 legend = 1,
-                upper=list(continuous='blank'), 
+                upper=list(continuous='blank'),
                 diag=list(continuous="barDiag"),
                 title="Types of learning (fpc)") +
 
@@ -152,16 +229,16 @@ GGally::ggpairs(data[c(7,6,8)] ,
   scale_fill_viridis_d(alpha = 0.5)
 
 # second dimensons typ 1 = B2 B5 B8 B9 T6 T7 T8
-#                  typ 2 = B6 T5 
+#                  typ 2 = B6 T5
 #                  typ 3 = B3 T3 T4
 #                  typ 4 = B1 T1 T2
-GGally::ggpairs(data[c(1,2,3,4,8)] , 
+GGally::ggpairs(data[c(1,2,3,4,8)] ,
                  aes(color = factor(nb_Best.partition)),
                 lower=list(discrete = "facetbar"),
                 axisLabels='show',
                 legend = 1,
 
-                upper=list(discrete='blank'), 
+                upper=list(discrete='blank'),
                 title="Types of learning (fpc)") +
   scale_fill_viridis(discrete=TRUE,alpha=0.5)
   #theme(legend.position = "bottom", legend.title = element_blank())
@@ -172,7 +249,7 @@ GGally::ggpairs(data[c(1,2,3,4,8)] ,
 #https://stackoverflow.com/questions/46413926/bubble-plot-using-ggplot2
 bubbleplot = function(data,title){
   g= ggplot(data,
-            aes(x = dimensions, y = levels, 
+            aes(x = dimensions, y = levels,
                 size = count  , label = count)) +#factor(count)
     geom_point(shape = 21, alpha=0.7,colour ="black",fill="orange") +
     geom_text(size = 3, color="black") +
@@ -182,7 +259,7 @@ bubbleplot = function(data,title){
     scale_fill_viridis(discrete=TRUE,alpha=0.5, name = "No. of Counts") +
     theme_cowplot()+
     ylab("Levels") +
-    xlab("Dimensions") + 
+    xlab("Dimensions") +
     theme(legend.position = "bottom") + ggtitle(title)
   return(g)
 }
@@ -202,7 +279,7 @@ mix     = t_data %>% group_by(levels, dimensions)%>% filter(sex == "mix")%>%  su
 bachelor= t_data %>% group_by(levels, dimensions)%>% filter(degree.program == "B")%>%  summarize(count=n())
 teacher = t_data %>% group_by(levels, dimensions)%>% filter(degree.program == "T")%>%  summarize(count=n())
 
-# create ggplot bubbleplots 
+# create ggplot bubbleplots
 for (plt in plt_lst){
   split=strsplit(plt,"_")
   name=split[[1]][1]
@@ -210,10 +287,14 @@ for (plt in plt_lst){
   assign(paste0("g_",plt),bubbleplot(data = eval(parse(text =name)),paste(name,"n=",no)))
 }
 
-# create list and cowplot objects 
-cowplot::plot_grid(plotlist = lapply(paste0("g_",plt_lst), function(x) {eval(parse(text =as.name(x)))}), 
+# create list and cowplot objects
+cowplot::plot_grid(plotlist = lapply(paste0("g_",plt_lst), function(x) {eval(parse(text =as.name(x)))}),
                    ncol = 2,nrow = 3)
 
 # ordination plots
 res.ca <- FactoMineR::CA(data[1:4], graph = FALSE)
 factoextra::fviz_ca_biplot(res.ca, repel = TRUE)
+
+
+
+
