@@ -139,8 +139,8 @@ pairs(data[1:4],cex=2, bg=c(1:4)[data$nb_Best.partition],pch = 21
       cex.labels = 1, font.labels = 1)
 # GGally ggpairsusing ggplot for kmeans.best fpc package
 # first sex subject
-GGally::ggpairs(data[c(5:6,8)] , 
-                aes(color = factor(nb_Best.partition,levels = 1:4, labels = c("type 3", "type 1","type 2","type 4"))),
+GGally::ggpairs(data[c(7,6,8)] , 
+                aes(color = factor(kmeans.best,levels = 1:4, labels = c("type 3", "type 1","type 2","type 4"))),
                 lower=list(continuous='points'),
                 axisLabels='show',
                 legend = 1,
