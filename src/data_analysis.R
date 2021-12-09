@@ -271,6 +271,7 @@ res=lapply(names(data[1:4]),function(x){
 })
 t_data=do.call("rbind", res)
 
+## drop sex manually added plotnames
 # count per group done each by each for more transparence
 all     = t_data %>% group_by(levels, dimensions)%>%  summarize(count=n())
 #female  = t_data %>% group_by(levels, dimensions)%>% filter(sex == "f")%>%  summarize(count=n())
@@ -287,16 +288,17 @@ for (plt in plt_lst){
   assign(paste0("g_",plt),bubbleplot(data = eval(parse(text =name)),paste(name,"n=",no)))
 }
 
-grid.arrange(g_all_15  ,g_bachelor_7 ,g_teacher_8,nrow = 3)
-
-png("figures/figure3.png",res=300, width = 1920,height = 1920)
-grid.arrange(g_all_15  ,g_bachelor_7 ,g_teacher_8,nrow = 3)
-dev.off() # C
+# # grid.arrange(g_all_15  ,g_bachelor_7 ,g_teacher_8,nrow = 3)
+# png("figures/figure3.png",res=190, width = 1920,height = 1920)
+# grid.arrange(g_all_15  ,g_bachelor_7 ,g_teacher_8,nrow = 3)
+# dev.off() # C
 
 
 # create list and cowplot objects
+png("figures/figure3.png",res=190, width = 1920,height = 1920)
 cowplot::plot_grid(plotlist = lapply(paste0("g_",plt_lst), function(x) {eval(parse(text =as.name(x)))}),
                    ncol = 1,nrow = 3)
+dev.off()
 
 # ordination plots
 res.ca <- FactoMineR::CA(data[1:4], graph = FALSE)
