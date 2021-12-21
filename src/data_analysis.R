@@ -184,14 +184,44 @@ dev.off() # C
 #KMEANS -----------------------------
 km <- factoextra::eclust(data[1:4], k = 4, seed = 123, FUNcluster = "kmeans",
                          hc_metric = "euclidian" ,hc_method = "complete")
-km.clus <- factoextra::fviz_cluster(km,main = "kmeans eclust")
-km.sil <- factoextra::fviz_silhouette(km)
+km.clus <- factoextra::fviz_cluster(km,main = "kmeans eclust",geom = c("point")) +
+  scale_colour_manual(name= "# Cluster",values = ggpPal) +
+  scale_fill_manual(name= "# Cluster",values =  ggpPal)+
+scale_shape_manual('# Cluster', values=c(21,22,23,24)) +
+  ggtitle(label='')
+km.clus + geom_text(data=km.clus$data, aes(x=x, y=y, label=name, colour=cluster),
+               vjust=-1, show.legend = F)+
+  ggtheme = theme_minimal()
+
+km.sil <- factoextra::fviz_silhouette(km,ggtheme = theme_minimal())+
+  scale_colour_manual(name= "# Cluster",values = ggpPal) +
+  scale_fill_manual(name= "# Cluster",values =  ggpPal)
+
+
+
+
+
 
 #PAM CLUSTERING ---------------------
 pam <- factoextra::eclust(data[1:4],seed=123, FUNcluster ="pam", k = 4,
                           hc_metric = "euclidian" ,hc_method = "complete")
-pam.clus <- factoextra::fviz_cluster(pam,main = "PAM eclust")
-pam.sil <- factoextra::fviz_silhouette(pam)
+
+
+pam.clus <- factoextra::fviz_cluster(pam,main = "PAM eclust",geom = c("point")) +
+  scale_colour_manual(name= "# Cluster",values = c(  "#a180a9", "#9adbbc", "#98b3c6", "#fef392")) +
+  scale_fill_manual(name= "# Cluster",values =  c(  "#a180a9", "#9adbbc", "#98b3c6", "#fef392"))+
+  scale_shape_manual('# Cluster', values=c(21,22,23,24)) +
+  ggtitle(label='')
+km.clus + geom_text(data=km.clus$data, aes(x=x, y=y, label=name, colour=cluster),
+                    vjust=-1, show.legend = F)+
+  ggtheme = theme_minimal()
+
+
+pam.sil <- factoextra::fviz_silhouette(pam ,ggtheme = theme_minimal())+
+  scale_colour_manual(name= "# Cluster",values = c(  "#a180a9","#9adbbc", "#98b3c6","#fef392")) +
+  scale_fill_manual(name= "# Cluster",values =  c(  "#a180a9","#9adbbc", "#98b3c6","#fef392"))
+
+
 
 
 # create panel
