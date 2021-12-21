@@ -184,14 +184,13 @@ dev.off() # C
 #KMEANS -----------------------------
 km <- factoextra::eclust(data[1:4], k = 4, seed = 123, FUNcluster = "kmeans",
                          hc_metric = "euclidian" ,hc_method = "complete")
-km.clus <- factoextra::fviz_cluster(km,main = "kmeans eclust",geom = c("point")) +
+km.clus <- factoextra::fviz_cluster(km,main = "2D K-means Cluster",geom = c("point"),show.clust.cent = FALSE) +
   scale_colour_manual(name= "# Cluster",values = ggpPal) +
   scale_fill_manual(name= "# Cluster",values =  ggpPal)+
-scale_shape_manual('# Cluster', values=c(21,22,23,24)) +
-  ggtitle(label='')
-km.clus + geom_text(data=km.clus$data, aes(x=x, y=y, label=name, colour=cluster),
+scale_shape_manual('# Cluster', values=c(21,22,23,24))
+km.clus = km.clus + geom_text(data=km.clus$data, aes(x=x, y=y, label=name, colour=cluster),
                vjust=-1, show.legend = F)+
-  ggtheme = theme_minimal()
+  theme_minimal()
 
 km.sil <- factoextra::fviz_silhouette(km,ggtheme = theme_minimal())+
   scale_colour_manual(name= "# Cluster",values = ggpPal) +
@@ -207,14 +206,13 @@ pam <- factoextra::eclust(data[1:4],seed=123, FUNcluster ="pam", k = 4,
                           hc_metric = "euclidian" ,hc_method = "complete")
 
 
-pam.clus <- factoextra::fviz_cluster(pam,main = "PAM eclust",geom = c("point")) +
+pam.clus <- factoextra::fviz_cluster(pam, main = "2D PAM Cluster",geom = c("point")) +
   scale_colour_manual(name= "# Cluster",values = c(  "#a180a9", "#9adbbc", "#98b3c6", "#fef392")) +
   scale_fill_manual(name= "# Cluster",values =  c(  "#a180a9", "#9adbbc", "#98b3c6", "#fef392"))+
-  scale_shape_manual('# Cluster', values=c(21,22,23,24)) +
-  ggtitle(label='')
-km.clus + geom_text(data=km.clus$data, aes(x=x, y=y, label=name, colour=cluster),
-                    vjust=-1, show.legend = F)+
-  ggtheme = theme_minimal()
+  scale_shape_manual('# Cluster', values=c(21,22,23,24))
+pam.clus = pam.clus + geom_text(data=pam.clus$data, aes(x=x, y=y, label=name, colour=cluster),
+                     vjust=-1, show.legend = F)+
+  theme_minimal()
 
 
 pam.sil <- factoextra::fviz_silhouette(pam ,ggtheme = theme_minimal())+
