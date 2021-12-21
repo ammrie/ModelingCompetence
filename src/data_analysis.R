@@ -165,7 +165,7 @@ elbow = factoextra::fviz_nbclust(data[1:4], method="wss", FUNcluster=kmeans, ite
   labs(title= "K-means") +
   xlab("Number of Clusters K") +
   ylab("Explained variance %")+
-  ggtitle("NbClust's optimal number of clusters")
+  ggtitle("Optimal number of clusters, elbow method")
 
 #-- create panel
 list1.plot <- list() #list to store the plots
